@@ -20,39 +20,37 @@ class _HomePageState extends State<HomePage> {
   void openNoteBox({String? docID}) {
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            content: TextField(controller: textController),
-            actions: [
-              ElevatedButton(
-                onPressed: () {
-                  // Add a new note
-                 if (docID == null) {
-                    firestoreService.addNote(textController.text);
-                  }
-                  // Update an existing note
-                  else {
-                    firestoreService.updateNote(docID, textController.text);
-                  }
+      builder: (context) => AlertDialog(
+        content: TextField(controller: textController),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              // Add a new note
+              if (docID == null) {
+                firestoreService.addNote(textController.text);
+              }
+              // Update an existing note
+              else {
+                firestoreService.updateNote(docID, textController.text);
+              }
 
-                  // Clear the text controller
-                  textController.clear();
+              // Clear the text controller
+              textController.clear();
 
-                  // Close the dialog
-                  Navigator.pop(context);
-                },
-                child: const Text('Save'),
-              ),
-            ],
+              // Close the dialog
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
           ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Notes')),
+      appBar: AppBar(title: const Text('Notes')),
       floatingActionButton: FloatingActionButton(
         onPressed: openNoteBox,
         child: const Icon(Icons.add),
@@ -69,27 +67,38 @@ class _HomePageState extends State<HomePage> {
               itemCount: notesList.length,
               itemBuilder: (context, index) {
                 // get each individual doc
-                DocumentSnapshot documnet = notesList[index];
-                String docID = documnet.id;
+                DocumentSnapshot document = notesList[index];
+                String docID = document.id;
 
                 // get note from the doc
                 Map<String, dynamic> data =
-                    documnet.data() as Map<String, dynamic>;
+                    document.data() as Map<String, dynamic>;
                 String noteText = data['note'];
 
                 // display as a list tile
                 return ListTile(
                   title: Text(noteText),
-                  trailing: IconButton(
-                    onPressed: () => openNoteBox(docID: docID),
-                    icon: const Icon(Icons.settings),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // update button
+                      IconButton(
+                        onPressed: () => openNoteBox(docID: docID),
+                        icon: const Icon(Icons.settings),
+                      ),
+
+                      // delete button
+                      IconButton(
+                        onPressed: () => firestoreService.deleteNote(docID),
+                        icon: const Icon(Icons.delete),
+                      ),
+                    ],
                   ),
                 );
-                
               },
             );
           }
-          // if therw is no data return nothing
+          // if there is no data return nothing
           else {
             return const Text('No notes yet!');
           }
