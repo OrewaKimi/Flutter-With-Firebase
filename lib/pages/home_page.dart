@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterfirebase/services/firestore.dart';
 
@@ -19,26 +20,25 @@ class _HomePageState extends State<HomePage> {
   void openNoteBox() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        content: TextField(
-          controller: textController,
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              // Add a new note
-              firestoreService.addNote(textController.text);
+      builder:
+          (context) => AlertDialog(
+            content: TextField(controller: textController),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  // Add a new note
+                  firestoreService.addNote(textController.text);
 
-              // Clear the text controller
-              textController.clear();
+                  // Clear the text controller
+                  textController.clear();
 
-              // Close the dialog
-              Navigator.pop(context);
-            },
-            child: const Text('Save'),
+                  // Close the dialog
+                  Navigator.pop(context);
+                },
+                child: const Text('Save'),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -49,6 +49,37 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: openNoteBox,
         child: const Icon(Icons.add),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: firestoreService.getNotes(),
+        builder: (context, snapshot) {
+          // if we have data, get all the docs
+          if (snapshot.hasData) {
+            List notesList = snapshot.data!.docs;
+
+            // display as a list
+            return ListView.builder(
+              itemCount: notesList.length,
+              itemBuilder: (context, index) {
+                // get each individual doc
+                DocumentSnapshot documnet = notesList[index];
+                String docID = documnet.id;
+
+                // get note from the doc
+                Map<String, dynamic> data =
+                    documnet.data() as Map<String, dynamic>;
+                String noteText = data['note'];
+
+                // display as a list tile
+                return ListTile(title: Text(noteText));
+              },
+            );
+          }
+          // if therw is no data return nothing
+          else {
+            return const Text('No notes yet!');
+          }
+        },
       ),
     );
   }
