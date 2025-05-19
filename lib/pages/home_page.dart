@@ -9,49 +9,47 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Firestore service
+  final FirestoreService firestoreService = FirestoreService();
+
+  // Text controller
+  final TextEditingController textController = TextEditingController();
+
+  // Open a dialog box to add a note
+  void openNoteBox() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: TextField(
+          controller: textController,
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              // Add a new note
+              firestoreService.addNote(textController.text);
+
+              // Clear the text controller
+              textController.clear();
+
+              // Close the dialog
+              Navigator.pop(context);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Notes')),
+      appBar: AppBar(title: const Text('Notes')),
       floatingActionButton: FloatingActionButton(
         onPressed: openNoteBox,
         child: const Icon(Icons.add),
       ),
     );
-  }
-
-  // firestore service
-  final FirestoreService firestoreService = FirestoreService();
-
-  // text contoller
-  final TextEditingController textController = TextEditingController();
-
-  // open a dialog vox to add a note
-  void openNoteBox() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        // text user input
-        content: TextField(
-          controller: textController,
-          ),
-          actions: [
-            // button to save
-            ElevatedButton(
-              onPressed: () {
-                // add a new note
-                firestoreService.addNote(textController.text);
-
-                // clear the text controller
-                textController.clear();
-
-                // close the dialog
-                Navigator.pop(context);
-              },
-              child: Text('Save'),
-            ),
-          ],
-        ),
-      );
   }
 }
